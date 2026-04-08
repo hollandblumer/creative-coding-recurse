@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const FONT_CLASSES = ["mono", "rainbow", "brico"];
 const ALL_COLORS = ["var(--blue)", "var(--orange)", "var(--yellow)", "var(--green)", "var(--white)", "var(--black)", "var(--brown)"];
+const TITLE_HIGHLIGHT_COLORS = ["var(--blue)", "var(--orange)", "var(--green)", "var(--white)", "var(--brown)"];
 const DECADES = [
   { label: "1930", years: ["1930"] },
   { label: "1940", years: ["1940"] },
@@ -14,25 +15,32 @@ const DECADES = [
   { label: "1990", years: ["1990"] },
   { label: "2000", years: ["2000"] },
 ];
+const BACKGROUND_DECADES = [
+  { text: "1930", top: "10%", left: "8%", rotation: -8, size: "clamp(28px, 4vw, 58px)" },
+  { text: "1940", top: "18%", right: "9%", rotation: 6, size: "clamp(24px, 3.6vw, 48px)" },
+  { text: "1950", top: "34%", left: "14%", rotation: -4, size: "clamp(30px, 4.4vw, 62px)" },
+  { text: "1960", top: "42%", right: "12%", rotation: 9, size: "clamp(26px, 3.8vw, 52px)" },
+  { text: "1970", top: "58%", left: "10%", rotation: -7, size: "clamp(22px, 3.2vw, 44px)" },
+  { text: "1980", top: "68%", right: "16%", rotation: 5, size: "clamp(32px, 4.8vw, 66px)" },
+  { text: "1990", top: "78%", left: "24%", rotation: -5, size: "clamp(24px, 3.4vw, 46px)" },
+  { text: "2000", top: "84%", right: "24%", rotation: 7, size: "clamp(26px, 3.7vw, 50px)" },
+];
 
 function pickDifferentFont(previous) {
   const options = FONT_CLASSES.filter((font) => font !== previous);
   return options[Math.floor(Math.random() * options.length)];
 }
 
-function MixedCharacters({ text }) {
-  let previous = null;
+function pickStableFont(text, index, previous, pool = FONT_CLASSES) {
+  const options = pool.filter((font) => font !== previous);
+  const seedSource = `${text}-${index}`;
+  let hash = 0;
 
-  return text.split("").map((char, index) => {
-    const fontClass = pickDifferentFont(previous);
-    previous = fontClass;
+  for (let i = 0; i < seedSource.length; i += 1) {
+    hash = (hash * 31 + seedSource.charCodeAt(i)) >>> 0;
+  }
 
-    return (
-      <span key={`${char}-${index}`} className={`char ${fontClass}`}>
-        {char === " " ? "\u00A0" : char}
-      </span>
-    );
-  });
+  return options[hash % options.length];
 }
 
 function Loader({ onDone }) {
@@ -54,7 +62,7 @@ function Loader({ onDone }) {
     let previous = null;
 
     return `${value}%`.split("").map((char, index) => {
-      const fontClass = pickDifferentFont(previous);
+      const fontClass = pickStableFont(`${value}%`, index, previous);
       previous = fontClass;
 
       return { char, fontClass, key: `${value}-${char}-${index}` };
@@ -78,7 +86,7 @@ function GeneratorText({ text }) {
   let previous = null;
 
   return text.split("").map((char, index) => {
-    const fontClass = pickDifferentFont(previous);
+    const fontClass = pickStableFont(text, index, previous);
     previous = fontClass;
 
     return (
@@ -89,151 +97,133 @@ function GeneratorText({ text }) {
   });
 }
 
-function MatterBackground({ activeDecade, safeAreaRef }) {
-  const sceneRef = useRef(null);
+function BackgroundDecades() {
+  return (
+    <div className="background-decades" aria-hidden="true">
+      {BACKGROUND_DECADES.map((item) => {
+        let previous = null;
+
+        return (
+          <span
+            key={`${item.text}-${item.top}-${item.left ?? item.right}`}
+            className="background-decade"
+            style={{
+              top: item.top,
+              left: item.left,
+              right: item.right,
+              transform: `rotate(${item.rotation}deg)`,
+              fontSize: item.size,
+            }}
+          >
+            {item.text.split("").map((char, index) => {
+              const fontClass = pickStableFont(item.text, index, previous);
+              previous = fontClass;
+
+              return (
+                <span key={`${item.text}-${char}-${index}`} className={`background-decade-char ${fontClass}`}>
+                  {char}
+                </span>
+              );
+            })}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function CursorShower() {
+  const [bursts, setBursts] = useState([]);
 
   useEffect(() => {
-    let disposed = false;
-    let teardown = () => {};
+    let timeoutId = null;
+    let lastSpawn = 0;
 
-    async function start() {
-      const matter = await import("matter-js");
-      const { Bodies, Body, Composite, Engine, Events, Runner, Vector } = matter;
-      const scene = sceneRef.current;
-
-      if (!scene || disposed) {
+    const handleMove = (event) => {
+      const now = performance.now();
+      if (now - lastSpawn < 28) {
         return;
       }
 
-      const engine = Engine.create();
-      engine.gravity.y = 1.8;
-      const world = engine.world;
-      let viewportWidth = window.innerWidth;
-      let viewportHeight = window.innerHeight;
-      let mouse = { x: -1000, y: -1000 };
-      const spawnedElements = [];
+      lastSpawn = now;
 
-      const makeWalls = () => {
-        const ground = Bodies.rectangle(viewportWidth / 2, viewportHeight + 25, viewportWidth * 4, 50, { isStatic: true });
-        const wallLeft = Bodies.rectangle(-50, viewportHeight / 2, 100, viewportHeight * 2, { isStatic: true });
-        const wallRight = Bodies.rectangle(viewportWidth + 50, viewportHeight / 2, 100, viewportHeight * 2, { isStatic: true });
-        Composite.add(world, [ground, wallLeft, wallRight]);
-      };
-
-      makeWalls();
-
-      const runner = Runner.create();
-      Runner.run(runner, engine);
-
-      const randomYearPool = () => {
-        const allDecades = DECADES.flatMap((decade) => decade.years);
-        return [...allDecades, ...allDecades, ...activeDecade.years];
-      };
-
-      const spawnYear = () => {
-        if (!scene) {
-          return;
-        }
-
-        const yearPool = randomYearPool();
-        const yearText = yearPool[Math.floor(Math.random() * yearPool.length)];
-        const fontSize = Math.floor(Math.random() * 28) + 56;
-        const x = Math.random() * viewportWidth;
-        const element = document.createElement("div");
-
-        element.className = "physics-year";
-        element.style.fontSize = `${fontSize}px`;
-        element.style.color = ALL_COLORS[Math.floor(Math.random() * ALL_COLORS.length)];
-
+      const nextBurst = Array.from({ length: 6 }, (_, index) => {
+        const angle = (Math.PI * 2 * index) / 6 + Math.random() * 0.45;
+        const distance = 10 + Math.random() * 24;
+        const decade = DECADES[Math.floor(Math.random() * DECADES.length)].label;
         let previous = null;
-        yearText.split("").forEach((char, index) => {
-          const fontClass = pickDifferentFont(previous);
+        const chars = decade.split("").map((char, charIndex) => {
+          const fontClass = pickStableFont(decade, charIndex, previous);
           previous = fontClass;
 
-          const span = document.createElement("span");
-          span.className = `char ${fontClass}`;
-          span.textContent = char;
-          span.dataset.index = String(index);
-          element.appendChild(span);
+          return {
+            char,
+            fontClass,
+            key: `${decade}-${index}-${charIndex}`,
+          };
         });
 
-        scene.appendChild(element);
-        const body = Bodies.rectangle(x, -100, fontSize * 2.9, fontSize * 1.15, {
-          restitution: 0.2,
-          friction: 0.1,
-          frictionAir: 0.01,
-        });
-
-        body.element = element;
-        Composite.add(world, body);
-        spawnedElements.push(element);
-      };
-
-      const handlePointerMove = (event) => {
-        mouse = { x: event.clientX, y: event.clientY };
-      };
-
-      Events.on(engine, "afterUpdate", () => {
-        const safeRect = safeAreaRef.current?.getBoundingClientRect();
-        const center = safeRect
-          ? { x: safeRect.left + safeRect.width / 2, y: safeRect.top + safeRect.height / 2 }
-          : { x: viewportWidth / 2, y: viewportHeight / 2 };
-
-        Composite.allBodies(world).forEach((body) => {
-          if (body.isStatic || !body.element) {
-            return;
-          }
-
-          const pointsToAvoid = [
-            { pos: center, radius: 250, strength: 0.005 },
-            { pos: mouse, radius: 200, strength: 0.015 },
-          ];
-
-          pointsToAvoid.forEach((point) => {
-            const offset = Vector.sub(body.position, point.pos);
-            const distance = Vector.magnitude(offset);
-
-            if (distance > 0 && distance < point.radius) {
-              const direction = Vector.normalise(offset);
-              const force = Vector.mult(direction, point.strength);
-              Body.applyForce(body, body.position, force);
-            }
-          });
-
-          const { x, y } = body.position;
-          const width = body.bounds.max.x - body.bounds.min.x;
-          const height = body.bounds.max.y - body.bounds.min.y;
-          body.element.style.transform = `translate(${x - width / 2}px, ${y - height / 2}px) rotate(${body.angle}rad)`;
-        });
+        return {
+          id: `${now}-${index}-${Math.random()}`,
+          chars,
+          x: event.clientX + Math.cos(angle) * distance,
+          y: event.clientY + Math.sin(angle) * distance,
+          rotation: -20 + Math.random() * 40,
+          scale: 0.8 + Math.random() * 0.45,
+          color: ALL_COLORS[Math.floor(Math.random() * ALL_COLORS.length)],
+        };
       });
 
-      const spawnInterval = window.setInterval(() => {
-        if (Composite.allBodies(world).length < 18) {
-          spawnYear();
-        }
-      }, 760);
+      setBursts((current) => [...current.slice(-42), ...nextBurst]);
 
-      window.addEventListener("pointermove", handlePointerMove);
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        setBursts((current) => current.slice(-26));
+      }, 620);
+    };
 
-      teardown = () => {
-        window.clearInterval(spawnInterval);
-        window.removeEventListener("pointermove", handlePointerMove);
-        Runner.stop(runner);
-        Composite.clear(world, false);
-        Engine.clear(engine);
-        spawnedElements.forEach((element) => element.remove());
-      };
-    }
-
-    start();
+    window.addEventListener("pointermove", handleMove);
 
     return () => {
-      disposed = true;
-      teardown();
+      window.removeEventListener("pointermove", handleMove);
+      window.clearTimeout(timeoutId);
     };
-  }, [activeDecade, safeAreaRef]);
+  }, []);
 
-  return <div ref={sceneRef} className="matter-scene" aria-hidden="true" />;
+  useEffect(() => {
+    if (bursts.length === 0) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setBursts((current) => current.slice(Math.max(0, current.length - 20)));
+    }, 700);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [bursts]);
+
+  return (
+    <div className="cursor-shower" aria-hidden="true">
+      {bursts.map((burst) => (
+        <span
+          key={burst.id}
+          className="cursor-spark"
+          style={{
+            left: burst.x,
+            top: burst.y,
+            color: burst.color,
+            transform: `translate(-50%, -50%) rotate(${burst.rotation}deg) scale(${burst.scale})`,
+          }}
+        >
+          {(burst.chars ?? [{ char: burst.text ?? "", fontClass: "mono", key: `${burst.id}-fallback` }]).map((item) => (
+            <span key={item.key} className={`cursor-spark-char ${item.fontClass}`}>
+              {item.char}
+            </span>
+          ))}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function TitleWord({ text, interval }) {
@@ -257,8 +247,7 @@ function TitleWord({ text, interval }) {
     <div className="word" aria-label={text}>
       {text.split("").map((char, index) => {
         const active = highlighted.includes(index);
-        const colorChoices = ALL_COLORS.filter((color) => color !== "var(--black)");
-        const randomColor = colorChoices[index % colorChoices.length];
+        const randomColor = TITLE_HIGHLIGHT_COLORS[index % TITLE_HIGHLIGHT_COLORS.length];
         const rotation = ((index % 5) - 2) * 2;
 
         return (
@@ -285,16 +274,9 @@ function TitleWord({ text, interval }) {
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [activeDecade, setActiveDecade] = useState(DECADES[0]);
-  const mainContainerRef = useRef(null);
-  const [clock, setClock] = useState(() => new Date());
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatorValue, setGeneratorValue] = useState(DECADES[0].label);
   const [showGeneratorResult, setShowGeneratorResult] = useState(false);
-
-  useEffect(() => {
-    const timerId = window.setInterval(() => setClock(new Date()), 60000);
-    return () => window.clearInterval(timerId);
-  }, []);
 
   useEffect(() => {
     if (!isGenerating) {
@@ -321,26 +303,11 @@ export default function HomePage() {
     return () => window.clearInterval(intervalId);
   }, [isGenerating]);
 
-  const formattedDate = new Intl.DateTimeFormat("en-US", {
-    month: "numeric",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "America/New_York",
-  }).format(clock);
-
-  const formattedTime = new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "America/New_York",
-    timeZoneName: "short",
-  })
-    .format(clock)
-    .toLowerCase();
-
   return (
     <main className="page-shell">
       {loading ? <Loader onDone={() => setLoading(false)} /> : null}
-      <MatterBackground activeDecade={activeDecade} safeAreaRef={mainContainerRef} />
+      <BackgroundDecades />
+      <CursorShower />
 
       <div className={`experience${loading ? " is-hidden" : ""}`}>
         {isGenerating || showGeneratorResult ? (
@@ -364,20 +331,12 @@ export default function HomePage() {
           </div>
         ) : null}
 
-        <div className="center-content" id="mainContainer" ref={mainContainerRef}>
+        <div className="center-content" id="mainContainer">
           <div className="title-group">
-            <div className="meta-row">
-              <div className="mixed-text">
-                <MixedCharacters text={formattedDate} />
-              </div>
-              <div className="mixed-text">
-                <MixedCharacters text={formattedTime} />
-              </div>
-            </div>
-
             <div className="title-main" id="shuffleTitle">
               <TitleWord text="creative" interval={800} />
               <TitleWord text="coding" interval={1200} />
+              <TitleWord text="meetup" interval={1000} />
             </div>
           </div>
 
@@ -393,7 +352,9 @@ export default function HomePage() {
               }
             }}
           >
-            find out
+            <span className="start-button-inner">
+              <span className="start-button-text mono">start</span>
+            </span>
           </button>
         </div>
       </div>
