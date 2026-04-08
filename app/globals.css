@@ -54,71 +54,41 @@ select {
 
 .background-decade {
   position: absolute;
-  color: rgba(26, 26, 26, 0.1);
+  top: -18%;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.01em;
+  color: rgba(26, 26, 26, 0.2);
+  font-size: clamp(24px, 4vw, 56px);
   line-height: 1;
   user-select: none;
   letter-spacing: -0.04em;
   filter: blur(0.2px);
-  animation: backgroundPulse 9s ease-in-out infinite;
+  transform: translateX(-50%);
+  animation: backgroundFall linear infinite;
 }
 
 .background-decade-char {
   display: inline-block;
 }
 
-@keyframes backgroundPulse {
+@keyframes backgroundFall {
   0% {
-    opacity: 0.12;
+    top: -18%;
+    opacity: 0;
   }
 
-  30% {
-    opacity: 0.11;
+  14% {
+    opacity: 0.18;
   }
 
-  55% {
-    opacity: 0.075;
-  }
-
-  80% {
-    opacity: 0.11;
+  70% {
+    top: 78%;
+    opacity: 0.2;
   }
 
   100% {
-    opacity: 0.12;
-  }
-}
-
-.cursor-shower {
-  position: fixed;
-  inset: 0;
-  z-index: 140;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.cursor-spark {
-  position: absolute;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.01em;
-  font-size: clamp(22px, 2.8vw, 34px);
-  line-height: 1;
-  opacity: 0.95;
-  user-select: none;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
-  animation: cursorFade 1s ease-out forwards;
-}
-
-.cursor-spark-char {
-  display: inline-block;
-}
-
-@keyframes cursorFade {
-  0% {
-    opacity: 0.95;
-  }
-
-  100% {
+    top: 112%;
     opacity: 0;
   }
 }
@@ -161,33 +131,6 @@ select {
   backdrop-filter: blur(4px);
 }
 
-.generator-close {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 52px;
-  min-height: 52px;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-  font-size: clamp(28px, 4vw, 44px);
-  line-height: 1;
-  pointer-events: auto;
-}
-
-.generator-close:hover {
-  transform: scale(1.05) rotate(-3deg);
-}
-
-.generator-close:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 4px;
-}
-
 .generator-label {
   color: var(--ink);
   font-size: clamp(14px, 2vw, 20px);
@@ -213,6 +156,20 @@ select {
   max-width: min(100vw - 40px, 980px);
 }
 
+.title-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+
+.title-button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 10px;
+}
+
 .title-main {
   display: flex;
   width: fit-content;
@@ -227,58 +184,6 @@ select {
   line-height: 0.84;
   letter-spacing: -0.055em;
   text-transform: lowercase;
-}
-
-.start-button {
-  position: relative;
-  z-index: 180;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 28px;
-  border: 2px solid var(--ink);
-  border-radius: 20px;
-  padding: 0;
-  background: var(--white);
-  color: var(--ink);
-  box-shadow: 8px 8px 0 rgba(26, 26, 26, 0.78);
-  line-height: 1;
-  appearance: none;
-  cursor: pointer;
-  pointer-events: auto;
-  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
-}
-
-.start-button:hover {
-  transform: translate(-2px, -2px);
-  background: var(--yellow);
-  box-shadow: 10px 10px 0 rgba(26, 26, 26, 0.82);
-}
-
-.start-button:active {
-  transform: translate(2px, 2px);
-  box-shadow: 4px 4px 0 rgba(26, 26, 26, 0.72);
-  background: #ffe073;
-}
-
-.start-button:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 4px;
-}
-
-.start-button-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 152px;
-  min-height: 58px;
-  padding: 10px 28px 12px;
-}
-
-.start-button-text {
-  display: inline-block;
-  font-size: clamp(28px, 3vw, 40px);
-  line-height: 1;
 }
 
 .word {
@@ -397,26 +302,6 @@ select {
 
   .title-group {
     width: min(100vw - 28px, 420px);
-  }
-
-  .start-button {
-    margin-top: 22px;
-    border-radius: 18px;
-    box-shadow: 5px 5px 0 rgba(26, 26, 26, 0.78);
-  }
-
-  .start-button:hover {
-    box-shadow: 6px 6px 0 rgba(26, 26, 26, 0.82);
-  }
-
-  .start-button:active {
-    box-shadow: 3px 3px 0 rgba(26, 26, 26, 0.72);
-  }
-
-  .start-button-inner {
-    min-width: 128px;
-    min-height: 48px;
-    padding: 8px 22px 10px;
   }
 
   .title-main {

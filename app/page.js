@@ -16,14 +16,24 @@ const DECADES = [
   { label: "2000", years: ["2000"] },
 ];
 const BACKGROUND_DECADES = [
-  { text: "1930", top: "10%", left: "8%", rotation: -8, size: "clamp(28px, 4vw, 58px)" },
-  { text: "1940", top: "18%", right: "9%", rotation: 6, size: "clamp(24px, 3.6vw, 48px)" },
-  { text: "1950", top: "34%", left: "14%", rotation: -4, size: "clamp(30px, 4.4vw, 62px)" },
-  { text: "1960", top: "42%", right: "12%", rotation: 9, size: "clamp(26px, 3.8vw, 52px)" },
-  { text: "1970", top: "58%", left: "10%", rotation: -7, size: "clamp(22px, 3.2vw, 44px)" },
-  { text: "1980", top: "68%", right: "16%", rotation: 5, size: "clamp(32px, 4.8vw, 66px)" },
-  { text: "1990", top: "78%", left: "24%", rotation: -5, size: "clamp(24px, 3.4vw, 46px)" },
-  { text: "2000", top: "84%", right: "24%", rotation: 7, size: "clamp(26px, 3.7vw, 50px)" },
+  { text: "1930", left: "7%", settle: "79%", rotation: -7, size: "clamp(30px, 4.4vw, 66px)", duration: "9.6s", delay: "0s" },
+  { text: "1940", left: "17%", settle: "85%", rotation: 5, size: "clamp(24px, 3.5vw, 50px)", duration: "10.1s", delay: "1.1s" },
+  { text: "1950", left: "28%", settle: "77%", rotation: -4, size: "clamp(34px, 4.9vw, 76px)", duration: "8.9s", delay: "2.2s" },
+  { text: "1960", left: "39%", settle: "83%", rotation: 6, size: "clamp(25px, 3.6vw, 52px)", duration: "9.8s", delay: "3.3s" },
+  { text: "1970", left: "50%", settle: "78%", rotation: -5, size: "clamp(23px, 3.3vw, 48px)", duration: "8.6s", delay: "4.4s" },
+  { text: "1980", left: "61%", settle: "84%", rotation: 4, size: "clamp(36px, 5.2vw, 82px)", duration: "9.4s", delay: "5.5s" },
+  { text: "1990", left: "72%", settle: "80%", rotation: -5, size: "clamp(24px, 3.5vw, 50px)", duration: "8.8s", delay: "6.6s" },
+  { text: "2000", left: "83%", settle: "86%", rotation: 6, size: "clamp(32px, 4.6vw, 70px)", duration: "9.9s", delay: "7.7s" },
+  { text: "1950", left: "12%", settle: "88%", rotation: 3, size: "clamp(22px, 3.1vw, 44px)", duration: "10.8s", delay: "8.8s" },
+  { text: "1980", left: "88%", settle: "82%", rotation: -4, size: "clamp(24px, 3.4vw, 48px)", duration: "9.2s", delay: "9.9s" },
+  { text: "1930", left: "10%", settle: "74%", rotation: 4, size: "clamp(22px, 3.2vw, 44px)", duration: "8.2s", delay: "0.6s" },
+  { text: "1940", left: "22%", settle: "90%", rotation: -6, size: "clamp(26px, 3.8vw, 56px)", duration: "8.8s", delay: "1.6s" },
+  { text: "1960", left: "33%", settle: "75%", rotation: 5, size: "clamp(22px, 3.2vw, 46px)", duration: "7.9s", delay: "2.5s" },
+  { text: "1970", left: "45%", settle: "89%", rotation: -4, size: "clamp(28px, 4vw, 60px)", duration: "8.5s", delay: "3.4s" },
+  { text: "1990", left: "58%", settle: "73%", rotation: 7, size: "clamp(22px, 3.1vw, 44px)", duration: "7.8s", delay: "4.2s" },
+  { text: "2000", left: "70%", settle: "90%", rotation: -5, size: "clamp(26px, 3.8vw, 56px)", duration: "8.4s", delay: "5.1s" },
+  { text: "1950", left: "78%", settle: "76%", rotation: 4, size: "clamp(24px, 3.4vw, 48px)", duration: "8.1s", delay: "5.9s" },
+  { text: "1980", left: "92%", settle: "88%", rotation: -6, size: "clamp(28px, 4vw, 60px)", duration: "8.7s", delay: "6.8s" },
 ];
 
 function pickDifferentFont(previous) {
@@ -105,14 +115,15 @@ function BackgroundDecades() {
 
         return (
           <span
-            key={`${item.text}-${item.top}-${item.left ?? item.right}`}
+            key={`${item.text}-${item.left}`}
             className="background-decade"
             style={{
-              top: item.top,
               left: item.left,
-              right: item.right,
+              "--settle": item.settle,
               transform: `rotate(${item.rotation}deg)`,
               fontSize: item.size,
+              animationDuration: item.duration,
+              animationDelay: item.delay,
             }}
           >
             {item.text.split("").map((char, index) => {
@@ -128,100 +139,6 @@ function BackgroundDecades() {
           </span>
         );
       })}
-    </div>
-  );
-}
-
-function CursorShower() {
-  const [bursts, setBursts] = useState([]);
-
-  useEffect(() => {
-    let timeoutId = null;
-    let lastSpawn = 0;
-
-    const handleMove = (event) => {
-      const now = performance.now();
-      if (now - lastSpawn < 28) {
-        return;
-      }
-
-      lastSpawn = now;
-
-      const nextBurst = Array.from({ length: 6 }, (_, index) => {
-        const angle = (Math.PI * 2 * index) / 6 + Math.random() * 0.45;
-        const distance = 10 + Math.random() * 24;
-        const decade = DECADES[Math.floor(Math.random() * DECADES.length)].label;
-        let previous = null;
-        const chars = decade.split("").map((char, charIndex) => {
-          const fontClass = pickStableFont(decade, charIndex, previous);
-          previous = fontClass;
-
-          return {
-            char,
-            fontClass,
-            key: `${decade}-${index}-${charIndex}`,
-          };
-        });
-
-        return {
-          id: `${now}-${index}-${Math.random()}`,
-          chars,
-          x: event.clientX + Math.cos(angle) * distance,
-          y: event.clientY + Math.sin(angle) * distance,
-          rotation: -20 + Math.random() * 40,
-          scale: 0.8 + Math.random() * 0.45,
-          color: ALL_COLORS[Math.floor(Math.random() * ALL_COLORS.length)],
-        };
-      });
-
-      setBursts((current) => [...current.slice(-42), ...nextBurst]);
-
-      window.clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => {
-        setBursts((current) => current.slice(-26));
-      }, 620);
-    };
-
-    window.addEventListener("pointermove", handleMove);
-
-    return () => {
-      window.removeEventListener("pointermove", handleMove);
-      window.clearTimeout(timeoutId);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (bursts.length === 0) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setBursts((current) => current.slice(Math.max(0, current.length - 20)));
-    }, 700);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [bursts]);
-
-  return (
-    <div className="cursor-shower" aria-hidden="true">
-      {bursts.map((burst) => (
-        <span
-          key={burst.id}
-          className="cursor-spark"
-          style={{
-            left: burst.x,
-            top: burst.y,
-            color: burst.color,
-            transform: `translate(-50%, -50%) rotate(${burst.rotation}deg) scale(${burst.scale})`,
-          }}
-        >
-          {(burst.chars ?? [{ char: burst.text ?? "", fontClass: "mono", key: `${burst.id}-fallback` }]).map((item) => (
-            <span key={item.key} className={`cursor-spark-char ${item.fontClass}`}>
-              {item.char}
-            </span>
-          ))}
-        </span>
-      ))}
     </div>
   );
 }
@@ -307,23 +224,10 @@ export default function HomePage() {
     <main className="page-shell">
       {loading ? <Loader onDone={() => setLoading(false)} /> : null}
       <BackgroundDecades />
-      <CursorShower />
 
       <div className={`experience${loading ? " is-hidden" : ""}`}>
         {isGenerating || showGeneratorResult ? (
           <div className="generator-screen" aria-live="polite">
-            <button
-              type="button"
-              className="generator-close"
-              aria-label="Close decade result"
-              onClick={() => {
-                if (!isGenerating) {
-                  setShowGeneratorResult(false);
-                }
-              }}
-            >
-              <span className="mono">x</span>
-            </button>
             <div className="generator-label">you are decade</div>
             <div className="generator-value">
               <GeneratorText text={generatorValue} />
@@ -332,17 +236,9 @@ export default function HomePage() {
         ) : null}
 
         <div className="center-content" id="mainContainer">
-          <div className="title-group">
-            <div className="title-main" id="shuffleTitle">
-              <TitleWord text="creative" interval={800} />
-              <TitleWord text="coding" interval={1200} />
-              <TitleWord text="meetup" interval={1000} />
-            </div>
-          </div>
-
           <button
             type="button"
-            className="start-button"
+            className="title-button"
             aria-label="Generate your decade"
             onClick={() => {
               if (!isGenerating) {
@@ -352,9 +248,12 @@ export default function HomePage() {
               }
             }}
           >
-            <span className="start-button-inner">
-              <span className="start-button-text mono">start</span>
-            </span>
+            <div className="title-group">
+              <div className="title-main" id="shuffleTitle">
+                <TitleWord text="click" interval={800} />
+                <TitleWord text="here" interval={1200} />
+              </div>
+            </div>
           </button>
         </div>
       </div>
