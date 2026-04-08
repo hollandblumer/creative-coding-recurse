@@ -54,15 +54,15 @@ select {
 
 .background-decade {
   position: absolute;
-  top: -18%;
+  top: -22%;
   display: inline-flex;
   align-items: baseline;
   gap: 0.01em;
-  color: rgba(26, 26, 26, 0.2);
-  font-size: clamp(24px, 4vw, 56px);
+  color: rgba(26, 26, 26, 0.17);
+  font-size: clamp(34px, 5.4vw, 96px);
   line-height: 1;
   user-select: none;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
   filter: blur(0.2px);
   transform: translateX(-50%);
   animation: backgroundFall linear infinite;
@@ -74,17 +74,17 @@ select {
 
 @keyframes backgroundFall {
   0% {
-    top: -18%;
+    top: -22%;
     opacity: 0;
   }
 
-  14% {
-    opacity: 0.18;
+  12% {
+    opacity: 0.16;
   }
 
-  70% {
-    top: 78%;
-    opacity: 0.2;
+  72% {
+    top: 72%;
+    opacity: 0.18;
   }
 
   100% {
@@ -297,7 +297,8 @@ select {
 
 @media (max-width: 700px) {
   .background-decade {
-    opacity: 0.85;
+    font-size: clamp(24px, 7vw, 58px);
+    color: rgba(26, 26, 26, 0.14);
   }
 
   .title-group {

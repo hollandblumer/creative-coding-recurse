@@ -16,24 +16,14 @@ const DECADES = [
   { label: "2000", years: ["2000"] },
 ];
 const BACKGROUND_DECADES = [
-  { text: "1930", left: "7%", settle: "79%", rotation: -7, size: "clamp(30px, 4.4vw, 66px)", duration: "9.6s", delay: "0s" },
-  { text: "1940", left: "17%", settle: "85%", rotation: 5, size: "clamp(24px, 3.5vw, 50px)", duration: "10.1s", delay: "1.1s" },
-  { text: "1950", left: "28%", settle: "77%", rotation: -4, size: "clamp(34px, 4.9vw, 76px)", duration: "8.9s", delay: "2.2s" },
-  { text: "1960", left: "39%", settle: "83%", rotation: 6, size: "clamp(25px, 3.6vw, 52px)", duration: "9.8s", delay: "3.3s" },
-  { text: "1970", left: "50%", settle: "78%", rotation: -5, size: "clamp(23px, 3.3vw, 48px)", duration: "8.6s", delay: "4.4s" },
-  { text: "1980", left: "61%", settle: "84%", rotation: 4, size: "clamp(36px, 5.2vw, 82px)", duration: "9.4s", delay: "5.5s" },
-  { text: "1990", left: "72%", settle: "80%", rotation: -5, size: "clamp(24px, 3.5vw, 50px)", duration: "8.8s", delay: "6.6s" },
-  { text: "2000", left: "83%", settle: "86%", rotation: 6, size: "clamp(32px, 4.6vw, 70px)", duration: "9.9s", delay: "7.7s" },
-  { text: "1950", left: "12%", settle: "88%", rotation: 3, size: "clamp(22px, 3.1vw, 44px)", duration: "10.8s", delay: "8.8s" },
-  { text: "1980", left: "88%", settle: "82%", rotation: -4, size: "clamp(24px, 3.4vw, 48px)", duration: "9.2s", delay: "9.9s" },
-  { text: "1930", left: "10%", settle: "74%", rotation: 4, size: "clamp(22px, 3.2vw, 44px)", duration: "8.2s", delay: "0.6s" },
-  { text: "1940", left: "22%", settle: "90%", rotation: -6, size: "clamp(26px, 3.8vw, 56px)", duration: "8.8s", delay: "1.6s" },
-  { text: "1960", left: "33%", settle: "75%", rotation: 5, size: "clamp(22px, 3.2vw, 46px)", duration: "7.9s", delay: "2.5s" },
-  { text: "1970", left: "45%", settle: "89%", rotation: -4, size: "clamp(28px, 4vw, 60px)", duration: "8.5s", delay: "3.4s" },
-  { text: "1990", left: "58%", settle: "73%", rotation: 7, size: "clamp(22px, 3.1vw, 44px)", duration: "7.8s", delay: "4.2s" },
-  { text: "2000", left: "70%", settle: "90%", rotation: -5, size: "clamp(26px, 3.8vw, 56px)", duration: "8.4s", delay: "5.1s" },
-  { text: "1950", left: "78%", settle: "76%", rotation: 4, size: "clamp(24px, 3.4vw, 48px)", duration: "8.1s", delay: "5.9s" },
-  { text: "1980", left: "92%", settle: "88%", rotation: -6, size: "clamp(28px, 4vw, 60px)", duration: "8.7s", delay: "6.8s" },
+  { text: "1930", left: "9%", settle: "72%", rotation: -5, size: "clamp(44px, 6.7vw, 108px)", duration: "10.8s", delay: "0s" },
+  { text: "1940", left: "26%", settle: "82%", rotation: 4, size: "clamp(36px, 5.4vw, 88px)", duration: "11.6s", delay: "1.8s" },
+  { text: "1950", left: "43%", settle: "70%", rotation: -4, size: "clamp(50px, 7.5vw, 118px)", duration: "10.1s", delay: "3.4s" },
+  { text: "1960", left: "60%", settle: "84%", rotation: 5, size: "clamp(38px, 5.8vw, 94px)", duration: "11.2s", delay: "5.1s" },
+  { text: "1970", left: "77%", settle: "74%", rotation: -6, size: "clamp(46px, 7vw, 114px)", duration: "10.4s", delay: "6.7s" },
+  { text: "1980", left: "91%", settle: "86%", rotation: 4, size: "clamp(34px, 5.2vw, 84px)", duration: "11.4s", delay: "8.3s" },
+  { text: "1990", left: "18%", settle: "90%", rotation: 3, size: "clamp(32px, 4.9vw, 80px)", duration: "12.1s", delay: "9.8s" },
+  { text: "2000", left: "69%", settle: "92%", rotation: -3, size: "clamp(36px, 5.6vw, 92px)", duration: "11.8s", delay: "11.2s" },
 ];
 
 function pickDifferentFont(previous) {
